@@ -1,0 +1,1883 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="night">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark light">
+  <title>雲棲塔庭｜夜之庭園</title>
+  <style>
+    :root {
+      --paper: #f4ead4;
+      --ink: #f4ead4;
+      --muted: rgba(234, 225, 204, 0.66);
+      --soft: rgba(234, 225, 204, 0.42);
+      --accent: #e4bd78;
+      --line: rgba(228, 189, 120, 0.28);
+      --panel: rgba(5, 24, 20, 0.68);
+      --panel-hover: rgba(9, 35, 29, 0.86);
+      --focus: #ffd997;
+      --shadow: rgba(1, 10, 8, 0.46);
+      color-scheme: dark;
+    }
+
+    html[data-theme="day"] {
+      --paper: #14352c;
+      --ink: #16392f;
+      --muted: rgba(20, 53, 44, 0.68);
+      --soft: rgba(20, 53, 44, 0.46);
+      --accent: #7c5126;
+      --line: rgba(60, 91, 74, 0.28);
+      --panel: rgba(242, 240, 221, 0.72);
+      --panel-hover: rgba(250, 247, 231, 0.9);
+      --focus: #75481d;
+      --shadow: rgba(35, 61, 50, 0.20);
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      width: 100%;
+      margin: 0;
+      min-height: 100%;
+      overflow-x: hidden;
+      background: #061915;
+    }
+
+    body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+      overflow-x: hidden;
+      color: var(--ink);
+      font-family: "PingFang TC", "Hiragino Sans TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    #scene {
+      position: fixed;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+      cursor: grab;
+      outline: none;
+    }
+
+    #scene.dragging {
+      cursor: grabbing;
+    }
+
+    #scene:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: -4px;
+    }
+
+    .interface {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .interface::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(2, 14, 11, 0.52) 0%, rgba(2, 14, 11, 0.13) 27%, transparent 48%),
+        linear-gradient(180deg, rgba(2, 14, 11, 0.18), transparent 32%, transparent 74%, rgba(2, 14, 11, 0.16));
+      transition: opacity 700ms ease;
+    }
+
+    html[data-theme="day"] .interface::before {
+      background:
+        linear-gradient(90deg, rgba(232, 237, 220, 0.48) 0%, rgba(232, 237, 220, 0.12) 28%, transparent 49%),
+        linear-gradient(180deg, rgba(240, 240, 220, 0.12), transparent 34%, transparent 76%, rgba(62, 99, 79, 0.08));
+    }
+
+    .hero {
+      position: absolute;
+      top: max(40px, env(safe-area-inset-top));
+      left: max(44px, env(safe-area-inset-left));
+      width: min(350px, calc(100vw - 88px));
+      pointer-events: none;
+      animation: reveal 900ms cubic-bezier(.2, .75, .2, 1) both;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 19px;
+      color: var(--accent);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.42em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 30px;
+      height: 1px;
+      background: currentColor;
+      opacity: 0.7;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--paper);
+      font-family: "Songti TC", "STSong", "Noto Serif CJK TC", "PMingLiU", serif;
+      font-size: clamp(42px, 3.8vw, 60px);
+      font-weight: 500;
+      line-height: 1.14;
+      letter-spacing: 0.045em;
+      overflow-wrap: anywhere;
+      word-break: normal;
+      text-wrap: pretty;
+      text-shadow: 0 8px 34px var(--shadow);
+    }
+
+    html[data-theme="day"] h1 {
+      color: var(--ink);
+    }
+
+    .subtitle {
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-family: "Songti TC", "STSong", "Noto Serif CJK TC", "PMingLiU", serif;
+      font-size: clamp(15px, 1.35vw, 18px);
+      letter-spacing: 0.18em;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    .hero-note {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 13px;
+      margin: 25px 0 0;
+      color: var(--soft);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      line-height: 1.5;
+    }
+
+    .hero-note span + span::before {
+      content: "·";
+      margin-right: 13px;
+      color: var(--accent);
+      opacity: 0.8;
+    }
+
+    .controls {
+      position: absolute;
+      right: max(38px, env(safe-area-inset-right));
+      top: 50%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 186px;
+      transform: translateY(-50%);
+      pointer-events: auto;
+      animation: revealControls 900ms 180ms cubic-bezier(.2, .75, .2, 1) both;
+    }
+
+    .control {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      min-height: 54px;
+      min-width: 44px;
+      padding: 10px 13px 10px 16px;
+      border: 1px solid var(--line);
+      border-radius: 2px;
+      background: var(--panel);
+      color: var(--ink);
+      text-align: left;
+      box-shadow: 0 12px 34px rgba(0, 9, 7, 0.08);
+      -webkit-backdrop-filter: blur(15px) saturate(115%);
+      backdrop-filter: blur(15px) saturate(115%);
+      cursor: pointer;
+      transition: background-color 220ms ease, border-color 220ms ease, transform 220ms ease;
+    }
+
+    .control::before {
+      content: "";
+      position: absolute;
+      inset: -1px auto -1px -1px;
+      width: 2px;
+      background: var(--accent);
+      opacity: 0;
+      transition: opacity 220ms ease;
+    }
+
+    .control:hover {
+      border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+      background: var(--panel-hover);
+      transform: translateX(-3px);
+    }
+
+    .control:hover::before {
+      opacity: 0.75;
+    }
+
+    .control:focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 4px;
+    }
+
+    .control-label {
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.09em;
+      white-space: nowrap;
+    }
+
+    .control-state {
+      min-width: 45px;
+      padding-left: 9px;
+      border-left: 1px solid var(--line);
+      color: var(--accent);
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      line-height: 1.35;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .status {
+      position: absolute;
+      left: max(44px, env(safe-area-inset-left));
+      bottom: max(34px, env(safe-area-inset-bottom));
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      color: var(--soft);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      line-height: 1.5;
+      animation: reveal 900ms 300ms cubic-bezier(.2, .75, .2, 1) both;
+    }
+
+    .status::before {
+      content: "";
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 62%, transparent);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .stage-space {
+      display: none;
+    }
+
+    @keyframes reveal {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes revealControls {
+      from {
+        opacity: 0;
+        transform: translate(12px, -50%);
+      }
+      to {
+        opacity: 1;
+        transform: translate(0, -50%);
+      }
+    }
+
+    @media (max-width: 1180px) {
+      .hero {
+        top: max(30px, env(safe-area-inset-top));
+        left: max(32px, env(safe-area-inset-left));
+        width: min(310px, calc(100vw - 64px));
+      }
+
+      h1 {
+        font-size: clamp(36px, 4.6vw, 52px);
+      }
+
+      .controls {
+        top: auto;
+        right: max(28px, env(safe-area-inset-right));
+        bottom: max(28px, env(safe-area-inset-bottom));
+        left: max(28px, env(safe-area-inset-left));
+        width: auto;
+        flex-direction: row;
+        transform: none;
+        animation-name: reveal;
+        animation-delay: 120ms;
+      }
+
+      .control {
+        flex: 1 1 0;
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 4px;
+        padding: 9px 8px;
+        text-align: center;
+      }
+
+      .control-state {
+        min-width: 0;
+        padding-left: 0;
+        border-left: 0;
+      }
+
+      .control:hover {
+        transform: translateY(-2px);
+      }
+
+      .status {
+        left: max(32px, env(safe-area-inset-left));
+        bottom: calc(max(28px, env(safe-area-inset-bottom)) + 82px);
+      }
+    }
+
+    @media (max-width: 560px) {
+      html,
+      body {
+        min-height: 100%;
+        overflow-y: auto;
+      }
+
+      .interface {
+        position: relative;
+        inset: auto;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        min-height: 100svh;
+        padding:
+          max(20px, env(safe-area-inset-top))
+          max(20px, env(safe-area-inset-right))
+          max(16px, env(safe-area-inset-bottom))
+          max(20px, env(safe-area-inset-left));
+      }
+
+      .interface::before {
+        position: fixed;
+      }
+
+      #scene {
+        touch-action: pan-y;
+      }
+
+      .hero {
+        position: relative;
+        top: auto;
+        left: auto;
+        width: 100%;
+      }
+
+      .eyebrow {
+        gap: 9px;
+        margin-bottom: 14px;
+        font-size: 9px;
+        letter-spacing: 0.34em;
+      }
+
+      .eyebrow::before {
+        width: 22px;
+      }
+
+      h1 {
+        font-size: clamp(36px, 10.2vw, 44px);
+        line-height: 1.18;
+        letter-spacing: 0.035em;
+      }
+
+      .subtitle {
+        margin-top: 13px;
+        font-size: 14px;
+        letter-spacing: 0.15em;
+      }
+
+      .hero-note {
+        margin-top: 17px;
+        font-size: 9px;
+      }
+
+      .hero-note span:last-child {
+        display: none;
+      }
+
+      .stage-space {
+        display: block;
+        flex-basis: 260px;
+        flex: 1 1 clamp(230px, 34svh, 310px);
+        min-height: 260px;
+        min-height: clamp(230px, 34svh, 310px);
+      }
+
+      .controls {
+        position: relative;
+        top: auto;
+        right: auto;
+        bottom: auto;
+        left: auto;
+        width: 100%;
+        margin: 0;
+        gap: 7px;
+        transform: none;
+      }
+
+      .control {
+        min-height: 56px;
+        min-width: 44px;
+        padding: 8px 5px;
+      }
+
+      .control-label {
+        font-size: 13px;
+        letter-spacing: 0.035em;
+      }
+
+      .control-state {
+        font-size: 10px;
+      }
+
+      .status {
+        position: relative;
+        left: auto;
+        bottom: auto;
+        max-width: 100%;
+        margin: 0 0 12px;
+        font-size: 10px;
+      }
+    }
+
+    @media (max-height: 700px) and (max-width: 1180px) {
+      .hero-note {
+        display: none;
+      }
+
+      .subtitle {
+        margin-top: 9px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas
+    id="scene"
+    role="img"
+    tabindex="0"
+    aria-label="夜色中的原創日式五重塔庭園。中央為奶油色牆、墨綠屋簷與暖金窗光的五重塔，前方有紅色鳥居，兩側是粉色櫻花。"
+    aria-describedby="scene-help statusText"
+  ></canvas>
+
+  <main class="interface">
+    <header class="hero">
+      <p class="eyebrow">Night Garden</p>
+      <h1>雲棲塔庭</h1>
+      <p class="subtitle">把片刻，留給安靜。</p>
+      <p class="hero-note">
+        <span>五重塔 · 石庭 · 夜櫻</span>
+        <span>拖曳或方向鍵旋轉</span>
+      </p>
+    </header>
+
+    <div class="stage-space" aria-hidden="true"></div>
+
+    <p class="status" id="statusText">夜景 · 自動旋轉 · 拖曳場景可環繞</p>
+
+    <nav class="controls" aria-label="場景控制">
+      <button class="control" id="pauseButton" type="button" aria-pressed="false" aria-label="暫停旋轉與所有場景動畫">
+        <span class="control-label" id="pauseLabel">暫停旋轉</span>
+        <span class="control-state" id="pauseState">旋轉中</span>
+      </button>
+      <button class="control" id="dayButton" type="button" aria-pressed="false" aria-label="切換日夜，目前為夜景">
+        <span class="control-label">切換日夜</span>
+        <span class="control-state" id="dayState">夜景</span>
+      </button>
+      <button class="control" id="resetButton" type="button">
+        <span class="control-label">重設視角</span>
+        <span class="control-state" id="resetState">預設</span>
+      </button>
+    </nav>
+
+    <p class="sr-only" id="scene-help">
+      拖曳場景或使用左右方向鍵旋轉視角，上下方向鍵調整俯仰。所有按鈕均可使用鍵盤操作。
+    </p>
+    <p class="sr-only" id="liveStatus" aria-live="polite"></p>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const canvas = document.getElementById("scene");
+      const ctx = canvas.getContext("2d");
+      const pauseButton = document.getElementById("pauseButton");
+      const dayButton = document.getElementById("dayButton");
+      const resetButton = document.getElementById("resetButton");
+      const pauseLabel = document.getElementById("pauseLabel");
+      const pauseState = document.getElementById("pauseState");
+      const dayState = document.getElementById("dayState");
+      const resetState = document.getElementById("resetState");
+      const statusText = document.getElementById("statusText");
+      const liveStatus = document.getElementById("liveStatus");
+
+      const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+      let reduceMotion = motionQuery.matches;
+      let paused = reduceMotion;
+      let isDay = false;
+      let dayAmount = 0;
+      let dayTarget = 0;
+      let dragging = false;
+      let dragPointerId = null;
+
+      const initialView = { yaw: 0.45, elevation: 0.44 };
+      let yaw = initialView.yaw;
+      let elevation = initialView.elevation;
+      let resetTween = null;
+      let resetTimer = 0;
+
+      let width = window.innerWidth;
+      let height = window.innerHeight;
+      let dpr = 1;
+      let scale = 60;
+      let centerX = width * 0.56;
+      let baseY = height * 0.77;
+      let elapsed = 0;
+      let lastFrame = 0;
+      let resizeTimer = 0;
+      let frameRequestId = 0;
+      let pageVisible = !document.hidden;
+
+      const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+      const lerp = (a, b, t) => a + (b - a) * t;
+
+      function mulberry32(seed) {
+        return function random() {
+          seed |= 0;
+          seed = seed + 0x6D2B79F5 | 0;
+          let value = Math.imul(seed ^ seed >>> 15, 1 | seed);
+          value = value + Math.imul(value ^ value >>> 7, 61 | value) ^ value;
+          return ((value ^ value >>> 14) >>> 0) / 4294967296;
+        };
+      }
+
+      const random = mulberry32(20261020);
+
+      const stars = Array.from({ length: 105 }, () => ({
+        x: random(),
+        y: random() * 0.63,
+        radius: 0.35 + random() * 1.25,
+        alpha: 0.16 + random() * 0.58,
+        speed: 0.5 + random() * 1.5,
+        phase: random() * Math.PI * 2
+      }));
+
+      const petals = Array.from({ length: 48 }, () => ({
+        x: random(),
+        y: random(),
+        size: 1.7 + random() * 3.4,
+        speed: 0.012 + random() * 0.025,
+        sway: 0.008 + random() * 0.018,
+        phase: random() * Math.PI * 2,
+        rotation: random() * Math.PI,
+        alpha: 0.22 + random() * 0.48
+      }));
+
+      const fireflies = Array.from({ length: 18 }, () => ({
+        x: -4.4 + random() * 8.8,
+        y: 0.45 + random() * 2.6,
+        z: -1.8 + random() * 6.2,
+        phase: random() * Math.PI * 2,
+        speed: 0.35 + random() * 0.7
+      }));
+
+      const night = {
+        skyTop: "#031512",
+        skyMid: "#092920",
+        skyBottom: "#12352b",
+        haze: "#9ccfaf",
+        horizon: "#17372f",
+        hillFar: "#0a251e",
+        hillNear: "#12332a",
+        stone: "#41564e",
+        stoneDark: "#263b35",
+        stoneLight: "#718077",
+        moss: "#3c5540",
+        mossLight: "#5d7457",
+        wall: "#ead9b8",
+        wallShade: "#c8b38f",
+        wood: "#7a2827",
+        woodDark: "#3b1416",
+        woodLight: "#a84b3f",
+        roof: "#173e34",
+        roofDark: "#0b2822",
+        roofEdge: "#82a889",
+        gold: "#e9bd72",
+        window: "#ffc56f",
+        windowHot: "#ffe3a3",
+        torii: "#ad3531",
+        toriiDark: "#632021",
+        cherry: "#eaa4b5",
+        cherryLight: "#ffd0d8",
+        cherryDeep: "#b9647b",
+        branch: "#3c2826",
+        fog: "#b7d7c2",
+        moon: "#f4dfb4",
+        moonHalo: "#f2d49a",
+        shadow: "#020d0a"
+      };
+
+      const day = {
+        skyTop: "#d7e3db",
+        skyMid: "#b9d1c6",
+        skyBottom: "#8bb6aa",
+        haze: "#eef0d9",
+        horizon: "#91b7aa",
+        hillFar: "#b1cabf",
+        hillNear: "#89ad9e",
+        stone: "#6f8278",
+        stoneDark: "#52675e",
+        stoneLight: "#9aa69b",
+        moss: "#617b5d",
+        mossLight: "#85947a",
+        wall: "#f1e2c3",
+        wallShade: "#d4bd94",
+        wood: "#87322d",
+        woodDark: "#552021",
+        woodLight: "#b25746",
+        roof: "#2d5749",
+        roofDark: "#193b33",
+        roofEdge: "#789c7c",
+        gold: "#bd8549",
+        window: "#f2bc62",
+        windowHot: "#ffe6a7",
+        torii: "#bb4339",
+        toriiDark: "#712724",
+        cherry: "#ebadbb",
+        cherryLight: "#ffe0e4",
+        cherryDeep: "#c27284",
+        branch: "#4b342e",
+        fog: "#f1f2dd",
+        moon: "#f2d79a",
+        moonHalo: "#fbf0c4",
+        shadow: "#385b4d"
+      };
+
+      function hexToRgb(hex) {
+        const value = parseInt(hex.slice(1), 16);
+        return [value >> 16 & 255, value >> 8 & 255, value & 255];
+      }
+
+      function rgba(hex, alpha) {
+        const [r, g, b] = hexToRgb(hex);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+
+      function mixHex(a, b, amount) {
+        const ar = hexToRgb(a);
+        const br = hexToRgb(b);
+        const channel = (value) => clamp(Math.round(value), 0, 255).toString(16).padStart(2, "0");
+        return `#${channel(lerp(ar[0], br[0], amount))}${channel(lerp(ar[1], br[1], amount))}${channel(lerp(ar[2], br[2], amount))}`;
+      }
+
+      function shade(hex, factor) {
+        const [r, g, b] = hexToRgb(hex);
+        return `rgb(${clamp(Math.round(r * factor), 0, 255)}, ${clamp(Math.round(g * factor), 0, 255)}, ${clamp(Math.round(b * factor), 0, 255)})`;
+      }
+
+      function paletteValue(key) {
+        return mixHex(night[key], day[key], dayAmount);
+      }
+
+      function themeColor(key, alpha = 1) {
+        const nightRgb = hexToRgb(night[key]);
+        const dayRgb = hexToRgb(day[key]);
+        const r = Math.round(lerp(nightRgb[0], dayRgb[0], dayAmount));
+        const g = Math.round(lerp(nightRgb[1], dayRgb[1], dayAmount));
+        const b = Math.round(lerp(nightRgb[2], dayRgb[2], dayAmount));
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+
+      function setSize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        const compact = width <= 560;
+        const tablet = width <= 1180;
+        const sceneXMin = -6.72;
+        const sceneXMax = 7.4;
+        const projectedXFactor = 0.9;
+        let availableWidth;
+        let availableCenter;
+
+        if (compact) {
+          const sideMargin = Math.max(12, width * 0.03);
+          availableWidth = width - sideMargin * 2;
+          availableCenter = width / 2;
+        } else if (tablet) {
+          const sideMargin = Math.max(28, width * 0.035);
+          availableWidth = width - sideMargin * 2;
+          availableCenter = width / 2;
+        } else {
+          const leftReserve = clamp(width * 0.29, 410, 500);
+          const rightReserve = clamp(width * 0.16, 260, 280);
+          availableWidth = width - leftReserve - rightReserve;
+          availableCenter = leftReserve + availableWidth / 2;
+        }
+
+        const widthFit = availableWidth / ((sceneXMax - sceneXMin) * projectedXFactor);
+        const heightFit = (height * (compact ? 0.62 : 0.7)) / 8.9;
+        const minimumScale = compact ? 24 : 32;
+        scale = clamp(Math.min(widthFit, heightFit), minimumScale, 72);
+
+        const sceneMidpoint = (sceneXMin + sceneXMax) / 2;
+        centerX = availableCenter - sceneMidpoint * scale * projectedXFactor;
+        baseY = height * (compact ? 0.7 : tablet ? 0.75 : 0.77);
+      }
+
+      function project(x, y, z) {
+        const cos = Math.cos(yaw);
+        const sin = Math.sin(yaw);
+        const rx = x * cos - z * sin;
+        const rz = x * sin + z * cos;
+        return {
+          x: centerX + rx * scale * 0.9,
+          y: baseY + rz * scale * elevation - y * scale,
+          depth: rz,
+          rx
+        };
+      }
+
+      function screenPolygon(points, fill, stroke = null, lineWidth = 1) {
+        if (!points.length) return;
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i += 1) {
+          ctx.lineTo(points[i].x, points[i].y);
+        }
+        ctx.closePath();
+        if (fill) {
+          ctx.fillStyle = fill;
+          ctx.fill();
+        }
+        if (stroke) {
+          ctx.strokeStyle = stroke;
+          ctx.lineWidth = lineWidth;
+          ctx.stroke();
+        }
+      }
+
+      function drawFace(points, fill, stroke = null, lineWidth = 1) {
+        screenPolygon(points.map(([x, y, z]) => project(x, y, z)), fill, stroke, lineWidth);
+      }
+
+      function polygonDepth(points) {
+        return points.reduce((sum, point) => sum + project(point[0], point[1], point[2]).depth, 0) / points.length;
+      }
+
+      function drawBox(x, y, z, boxWidth, boxHeight, boxDepth, colorHex, options = {}) {
+        const hw = boxWidth / 2;
+        const hd = boxDepth / 2;
+        const top = y + boxHeight;
+        const faces = [
+          {
+            points: [[x - hw, top, z + hd], [x + hw, top, z + hd], [x + hw, top, z - hd], [x - hw, top, z - hd]],
+            factor: 1.14
+          },
+          {
+            points: [[x - hw, y, z + hd], [x + hw, y, z + hd], [x + hw, top, z + hd], [x - hw, top, z + hd]],
+            factor: 0.91
+          },
+          {
+            points: [[x + hw, y, z - hd], [x + hw, y, z + hd], [x + hw, top, z + hd], [x + hw, top, z - hd]],
+            factor: 0.82
+          },
+          {
+            points: [[x + hw, y, z - hd], [x - hw, y, z - hd], [x - hw, top, z - hd], [x + hw, top, z - hd]],
+            factor: 0.7
+          },
+          {
+            points: [[x - hw, y, z + hd], [x - hw, y, z - hd], [x - hw, top, z - hd], [x - hw, top, z + hd]],
+            factor: 0.76
+          }
+        ];
+
+        faces.forEach((face) => {
+          face.depth = polygonDepth(face.points);
+        });
+        faces.sort((a, b) => a.depth - b.depth);
+
+        faces.forEach((face) => {
+          const edge = options.stroke === false ? null : themeColor("shadow", 0.2);
+          drawFace(face.points, shade(colorHex, face.factor), edge, options.lineWidth || 0.7);
+        });
+
+        if (options.topGrain) {
+          const topFace = faces.find((face) => face.factor === 1.14);
+          if (topFace) {
+            const projected = topFace.points.map(([px, py, pz]) => project(px, py, pz));
+            ctx.save();
+            ctx.globalAlpha = 0.25;
+            ctx.strokeStyle = themeColor("mossLight", 0.7);
+            ctx.lineWidth = 0.7;
+            ctx.beginPath();
+            ctx.moveTo(lerp(projected[0].x, projected[1].x, 0.2), lerp(projected[0].y, projected[1].y, 0.2));
+            ctx.lineTo(lerp(projected[1].x, projected[2].x, 0.65), lerp(projected[1].y, projected[2].y, 0.65));
+            ctx.moveTo(lerp(projected[3].x, projected[2].x, 0.3), lerp(projected[3].y, projected[2].y, 0.3));
+            ctx.lineTo(lerp(projected[2].x, projected[1].x, 0.78), lerp(projected[2].y, projected[1].y, 0.78));
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+      }
+
+      function getWalls(wallWidth, y, wallHeight) {
+        const half = wallWidth / 2;
+        return [
+          {
+            normal: [0, 1],
+            point: (u, v) => [u, v, half],
+            depth: (() => {
+              const sin = Math.sin(yaw);
+              const cos = Math.cos(yaw);
+              return sin * 0 + cos * 1;
+            })()
+          },
+          {
+            normal: [1, 0],
+            point: (u, v) => [half, v, u],
+            depth: (() => {
+              const sin = Math.sin(yaw);
+              const cos = Math.cos(yaw);
+              return sin * 1 + cos * 0;
+            })()
+          },
+          {
+            normal: [0, -1],
+            point: (u, v) => [u, v, -half],
+            depth: (() => {
+              const sin = Math.sin(yaw);
+              const cos = Math.cos(yaw);
+              return sin * 0 + cos * -1;
+            })()
+          },
+          {
+            normal: [-1, 0],
+            point: (u, v) => [-half, v, u],
+            depth: (() => {
+              const sin = Math.sin(yaw);
+              const cos = Math.cos(yaw);
+              return sin * -1 + cos * 0;
+            })()
+          }
+        ].map((wall) => ({
+          ...wall,
+          y,
+          wallHeight
+        }));
+      }
+
+      function wallRegion(wall, u0, u1, v0, v1) {
+        return [
+          wall.point(u0, v0),
+          wall.point(u1, v0),
+          wall.point(u1, v1),
+          wall.point(u0, v1)
+        ];
+      }
+
+      function drawWallRegion(wall, u0, u1, v0, v1, fill, stroke = null, lineWidth = 0.7) {
+        drawFace(wallRegion(wall, u0, u1, v0, v1), fill, stroke, lineWidth);
+      }
+
+      function drawPagodaBody(wallWidth, bodyY, bodyHeight, level) {
+        const wall = paletteValue("wall");
+        const wood = paletteValue("wood");
+        const woodDark = paletteValue("woodDark");
+        const windowColor = paletteValue("window");
+        const windowHot = paletteValue("windowHot");
+
+        drawBox(0, bodyY, 0, wallWidth, bodyHeight, wallWidth, wall, {
+          stroke: true,
+          lineWidth: 0.8
+        });
+
+        const walls = getWalls(wallWidth, bodyY, bodyHeight)
+          .filter((face) => face.depth > -0.015)
+          .sort((a, b) => a.depth - b.depth);
+
+        walls.forEach((wallFace) => {
+          const uMin = -wallWidth / 2;
+          const uMax = wallWidth / 2;
+          const beam = Math.max(0.055, wallWidth * 0.025);
+          const postWidth = Math.max(0.038, beam * 0.68);
+
+          drawWallRegion(wallFace, uMin, uMax, bodyY + 0.045, bodyY + 0.045 + beam, woodDark);
+          drawWallRegion(wallFace, uMin, uMax, bodyY + bodyHeight - beam - 0.035, bodyY + bodyHeight - 0.035, wood);
+
+          const postPositions = [-wallWidth * 0.47, 0, wallWidth * 0.47];
+          postPositions.forEach((u) => {
+            drawWallRegion(wallFace, u - postWidth / 2, u + postWidth / 2, bodyY + 0.05, bodyY + bodyHeight - 0.045, level > 2 ? wood : woodDark);
+          });
+
+          const count = level < 2 ? 3 : 2;
+          const available = wallWidth * 0.72;
+          const spacing = available / count;
+          const windowWidth = Math.min(0.36, spacing * 0.5);
+          const windowBottom = bodyY + bodyHeight * 0.27;
+          const windowTop = bodyY + bodyHeight * 0.76;
+
+          for (let index = 0; index < count; index += 1) {
+            const center = (index - (count - 1) / 2) * spacing;
+            const u0 = center - windowWidth / 2;
+            const u1 = center + windowWidth / 2;
+            const frame = 0.045;
+
+            drawWallRegion(wallFace, u0 - frame, u1 + frame, windowBottom - frame, windowTop + frame, woodDark);
+            ctx.save();
+            ctx.shadowColor = themeColor("window", 0.56 * (1 - dayAmount));
+            ctx.shadowBlur = Math.max(6, scale * 0.28);
+            drawWallRegion(wallFace, u0, u1, windowBottom, windowTop, windowColor);
+            ctx.restore();
+
+            if (1 - dayAmount > 0.18) {
+              const glowWidth = (u1 - u0) * 0.22;
+              drawWallRegion(wallFace, (u0 + u1) / 2 - glowWidth / 2, (u0 + u1) / 2 + glowWidth / 2, windowBottom + 0.02, windowTop - 0.02, windowHot);
+            }
+
+            for (let grid = 1; grid <= 4; grid += 1) {
+              const gridU = lerp(u0, u1, grid / 5);
+              drawWallRegion(wallFace, gridU - 0.009, gridU + 0.009, windowBottom, windowTop, woodDark, null, 0.4);
+            }
+            for (let grid = 1; grid <= 2; grid += 1) {
+              const gridV = lerp(windowBottom, windowTop, grid / 3);
+              drawWallRegion(wallFace, u0, u1, gridV - 0.008, gridV + 0.008, woodDark, null, 0.4);
+            }
+          }
+
+          const eaveLight = project(...wallFace.point(0, bodyY + bodyHeight * 0.84));
+          ctx.save();
+          ctx.shadowColor = themeColor("window", 0.5 * (1 - dayAmount));
+          ctx.shadowBlur = Math.max(4, scale * 0.2);
+          ctx.fillStyle = rgba(windowHot, 0.78);
+          ctx.beginPath();
+          ctx.arc(eaveLight.x, eaveLight.y, Math.max(1.1, scale * 0.026), 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+      }
+
+      function drawRoof(halfWidth, eaveY, topY, level) {
+        const innerHalf = halfWidth * 0.35;
+        const lift = 0.095 + level * 0.004;
+        const sag = 0.045;
+        const roofColor = paletteValue("roof");
+        const roofDark = paletteValue("roofDark");
+        const roofEdge = paletteValue("roofEdge");
+        const gold = paletteValue("gold");
+
+        const corners = [
+          [-halfWidth, eaveY + lift, halfWidth],
+          [halfWidth, eaveY + lift, halfWidth],
+          [halfWidth, eaveY + lift, -halfWidth],
+          [-halfWidth, eaveY + lift, -halfWidth]
+        ];
+        const inner = [
+          [-innerHalf, topY, innerHalf],
+          [innerHalf, topY, innerHalf],
+          [innerHalf, topY, -innerHalf],
+          [-innerHalf, topY, -innerHalf]
+        ];
+        const mids = [
+          [0, eaveY - sag, halfWidth],
+          [halfWidth, eaveY - sag, 0],
+          [0, eaveY - sag, -halfWidth],
+          [-halfWidth, eaveY - sag, 0]
+        ];
+
+        const faces = [];
+        for (let side = 0; side < 4; side += 1) {
+          const next = (side + 1) % 4;
+          const top = [inner[side], inner[next], corners[next], mids[side], corners[side]];
+          const soffit = [
+            corners[side],
+            corners[next],
+            [corners[next][0], corners[next][1] - 0.17, corners[next][2]],
+            [corners[side][0], corners[side][1] - 0.17, corners[side][2]]
+          ];
+          faces.push({
+            top,
+            soffit,
+            depth: polygonDepth(top),
+            factor: [0.98, 0.88, 0.79, 0.86][side]
+          });
+        }
+
+        faces.sort((a, b) => a.depth - b.depth);
+        faces.forEach((face) => {
+          drawFace(face.soffit, shade(roofDark, 0.85), themeColor("shadow", 0.25), 0.7);
+          drawFace(face.top, shade(roofColor, face.factor), themeColor("shadow", 0.28), 0.75);
+        });
+
+        for (let side = 0; side < 4; side += 1) {
+          const next = (side + 1) % 4;
+          const p0 = project(corners[side][0], corners[side][1], corners[side][2]);
+          const p1 = project(mids[side][0], mids[side][1], mids[side][2]);
+          const p2 = project(corners[next][0], corners[next][1], corners[next][2]);
+          ctx.beginPath();
+          ctx.moveTo(p0.x, p0.y);
+          ctx.lineTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.strokeStyle = rgba(roofEdge, 0.72);
+          ctx.lineWidth = Math.max(0.8, scale * 0.018);
+          ctx.stroke();
+        }
+
+        corners.forEach((corner) => {
+          const point = project(corner[0], corner[1] + 0.015, corner[2]);
+          ctx.save();
+          ctx.shadowColor = themeColor("gold", 0.35);
+          ctx.shadowBlur = scale * 0.08;
+          ctx.fillStyle = rgba(gold, 0.82);
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, Math.max(1.1, scale * 0.023), 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+      }
+
+      function drawPagodaRailing(railingWidth, baseY) {
+        const half = railingWidth / 2;
+        const wood = paletteValue("wood");
+        const woodDark = paletteValue("woodDark");
+        const railSize = Math.max(0.035, railingWidth * 0.018);
+        const railY = baseY + 0.19;
+        const postHeight = 0.27;
+        const postSize = Math.max(0.038, railingWidth * 0.02);
+
+        drawBox(0, railY, half, railingWidth, railSize, railSize, wood, { stroke: false });
+        drawBox(0, railY, -half, railingWidth, railSize, railSize, wood, { stroke: false });
+        drawBox(half, railY, 0, railSize, railSize, railingWidth, wood, { stroke: false });
+        drawBox(-half, railY, 0, railSize, railSize, railingWidth, wood, { stroke: false });
+
+        [-half, 0, half].forEach((offset) => {
+          drawBox(offset, baseY, half, postSize, postHeight, postSize, woodDark, { stroke: false });
+          drawBox(offset, baseY, -half, postSize, postHeight, postSize, woodDark, { stroke: false });
+          drawBox(half, baseY, offset, postSize, postHeight, postSize, woodDark, { stroke: false });
+          drawBox(-half, baseY, offset, postSize, postHeight, postSize, woodDark, { stroke: false });
+        });
+      }
+
+      function drawEaveBrackets(bodyWidth, eaveY) {
+        const half = bodyWidth / 2;
+        const wood = paletteValue("wood");
+        const woodDark = paletteValue("woodDark");
+
+        drawBox(0, eaveY - 0.11, 0, bodyWidth + 0.3, 0.1, bodyWidth + 0.3, woodDark, {
+          stroke: true,
+          lineWidth: 0.55
+        });
+
+        [-1, 1].forEach((xSide) => {
+          [-1, 1].forEach((zSide) => {
+            drawBox(
+              xSide * (half + 0.05),
+              eaveY - 0.24,
+              zSide * (half + 0.05),
+              0.11,
+              0.23,
+              0.11,
+              wood,
+              { stroke: true, lineWidth: 0.45 }
+            );
+          });
+        });
+      }
+
+      function drawPagoda() {
+        const levels = [
+          { bodyWidth: 3.12, bodyHeight: 1.0, roofWidth: 4.55, roofRise: 0.55 },
+          { bodyWidth: 2.8, bodyHeight: 0.9, roofWidth: 4.08, roofRise: 0.52 },
+          { bodyWidth: 2.48, bodyHeight: 0.82, roofWidth: 3.62, roofRise: 0.49 },
+          { bodyWidth: 2.2, bodyHeight: 0.75, roofWidth: 3.2, roofRise: 0.46 },
+          { bodyWidth: 1.92, bodyHeight: 0.66, roofWidth: 2.78, roofRise: 0.43 }
+        ];
+
+        let bottom = 1.02;
+
+        levels.forEach((level, index) => {
+          const balconyWidth = level.bodyWidth + 0.46;
+          drawBox(0, bottom - 0.03, 0, balconyWidth, 0.13, balconyWidth, paletteValue("wood"), {
+            stroke: true,
+            lineWidth: 0.7
+          });
+
+          drawPagodaBody(level.bodyWidth, bottom + 0.08, level.bodyHeight, index);
+          drawPagodaRailing(balconyWidth - 0.08, bottom + 0.1);
+
+          const bodyTop = bottom + 0.08 + level.bodyHeight;
+          drawBox(0, bodyTop - 0.06, 0, level.bodyWidth + 0.2, 0.16, level.bodyWidth + 0.2, paletteValue("woodDark"), {
+            stroke: false
+          });
+
+          const eaveY = bodyTop + 0.08;
+          const roofTop = eaveY + level.roofRise;
+          drawEaveBrackets(level.bodyWidth, eaveY);
+          drawRoof(level.roofWidth / 2, eaveY, roofTop, index);
+          bottom = roofTop - 0.045;
+        });
+
+        const topY = bottom + 0.03;
+        const finialBase = project(0, topY, 0);
+        const finialTip = project(0, topY + 0.82, 0);
+        const gold = paletteValue("gold");
+        const woodDark = paletteValue("woodDark");
+
+        ctx.save();
+        ctx.lineCap = "round";
+        ctx.strokeStyle = rgba(woodDark, 0.95);
+        ctx.lineWidth = Math.max(1.4, scale * 0.045);
+        ctx.beginPath();
+        ctx.moveTo(finialBase.x, finialBase.y);
+        ctx.lineTo(finialTip.x, finialTip.y);
+        ctx.stroke();
+
+        const rings = [0.1, 0.23, 0.37, 0.52];
+        rings.forEach((heightOffset, ringIndex) => {
+          const point = project(0, topY + heightOffset, 0);
+          ctx.strokeStyle = rgba(gold, 0.9);
+          ctx.lineWidth = Math.max(0.8, scale * 0.018);
+          ctx.beginPath();
+          ctx.ellipse(point.x, point.y, Math.max(2.2, scale * (0.07 - ringIndex * 0.008)), Math.max(0.9, scale * 0.018), yaw, 0, Math.PI * 2);
+          ctx.stroke();
+        });
+
+        ctx.shadowColor = themeColor("gold", 0.6 * (1 - dayAmount));
+        ctx.shadowBlur = scale * 0.18;
+        ctx.fillStyle = rgba(gold, 0.96);
+        ctx.beginPath();
+        ctx.arc(finialTip.x, finialTip.y, Math.max(2.2, scale * 0.052), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawTreeBranch(points, lineWidth, colorHex) {
+        const projected = points.map(([x, y, z]) => project(x, y, z));
+        ctx.save();
+        ctx.strokeStyle = colorHex;
+        ctx.lineWidth = Math.max(0.8, lineWidth);
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.beginPath();
+        ctx.moveTo(projected[0].x, projected[0].y);
+        for (let index = 1; index < projected.length - 1; index += 1) {
+          const midpoint = {
+            x: (projected[index].x + projected[index + 1].x) / 2,
+            y: (projected[index].y + projected[index + 1].y) / 2
+          };
+          ctx.quadraticCurveTo(projected[index].x, projected[index].y, midpoint.x, midpoint.y);
+        }
+        const last = projected[projected.length - 1];
+        ctx.lineTo(last.x, last.y);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawBlossomCluster(x, y, z, radius, density = 1) {
+        const point = project(x, y, z);
+        const r = Math.max(3.5, radius * scale);
+        const cherry = paletteValue("cherry");
+        const cherryLight = paletteValue("cherryLight");
+        const cherryDeep = paletteValue("cherryDeep");
+        const clusterSeed = Math.abs(Math.floor((x * 739 + y * 503 + z * 317 + radius * 997) * 10000));
+        const clusterRandom = mulberry32(clusterSeed);
+
+        ctx.save();
+        const halo = ctx.createRadialGradient(point.x, point.y, 0, point.x, point.y, r * 1.9);
+        halo.addColorStop(0, rgba(cherryLight, 0.18));
+        halo.addColorStop(0.55, rgba(cherry, 0.1));
+        halo.addColorStop(1, rgba(cherry, 0));
+        ctx.fillStyle = halo;
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, r * 1.9, 0, Math.PI * 2);
+        ctx.fill();
+
+        const count = Math.round(9 * density);
+        for (let index = 0; index < count; index += 1) {
+          const angle = clusterRandom() * Math.PI * 2;
+          const distance = Math.sqrt(clusterRandom()) * r * 0.9;
+          const px = point.x + Math.cos(angle) * distance;
+          const py = point.y + Math.sin(angle) * distance * 0.72;
+          const size = r * (0.23 + clusterRandom() * 0.23);
+          ctx.save();
+          ctx.translate(px, py);
+          ctx.rotate(angle + clusterRandom() * 0.8);
+          ctx.fillStyle = rgba(index % 3 === 0 ? cherryLight : index % 4 === 0 ? cherryDeep : cherry, 0.72 + clusterRandom() * 0.22);
+          ctx.beginPath();
+          ctx.ellipse(0, 0, size, size * 0.55, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        ctx.fillStyle = rgba(paletteValue("gold"), 0.78);
+        ctx.beginPath();
+        ctx.arc(point.x + r * 0.1, point.y - r * 0.05, Math.max(0.8, r * 0.08), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawCherryTree(originX, originZ, side, treeScale, seedOffset) {
+        const localRandom = mulberry32(4171 + seedOffset);
+        const branches = [
+          { points: [[0, 0.25, 0], [0.03, 1.0, 0.04], [-0.1, 1.92, 0.1], [-0.18, 2.52, 0.08]], width: 0.25 },
+          { points: [[-0.05, 1.15, 0.04], [side * -0.48, 1.72, 0.32], [side * -0.9, 2.18, 0.42], [side * -1.18, 2.52, 0.4]], width: 0.13 },
+          { points: [[-0.05, 1.5, 0.06], [side * 0.5, 2.0, 0.23], [side * 0.9, 2.33, 0.12], [side * 1.23, 2.68, -0.03]], width: 0.12 },
+          { points: [[-0.12, 1.88, 0.08], [side * 0.25, 2.34, -0.32], [side * 0.46, 2.68, -0.52], [side * 0.62, 2.96, -0.62]], width: 0.1 },
+          { points: [[-0.1, 2.15, 0.1], [side * -0.4, 2.56, 0.48], [side * -0.63, 2.88, 0.62], [side * -0.88, 3.06, 0.7]], width: 0.085 },
+          { points: [[-0.15, 2.4, 0.07], [side * 0.1, 2.85, -0.08], [side * 0.32, 3.22, -0.12]], width: 0.07 }
+        ];
+
+        branches.forEach((branch, branchIndex) => {
+          const projected = branch.points.map(([x, y, z]) => [
+            originX + x * treeScale,
+            y * treeScale * 0.94,
+            originZ + z * treeScale
+          ]);
+          const lineWidth = Math.max(1.1, scale * branch.width * treeScale * 0.42);
+          drawTreeBranch(projected, lineWidth, branchIndex === 0 ? rgba(paletteValue("branch"), 0.96) : rgba(paletteValue("branch"), 0.84));
+          if (branchIndex === 0) {
+            drawTreeBranch(projected.map(([x, y, z]) => [x - 0.035, y, z + 0.02]), Math.max(0.6, lineWidth * 0.24), rgba(paletteValue("woodLight"), 0.2));
+          }
+        });
+
+        const clusters = [
+          [-0.2, 2.55, 0.1, 0.15],
+          [side * -1.15, 2.55, 0.4, 0.16],
+          [side * 1.2, 2.7, -0.05, 0.17],
+          [side * 0.64, 3.0, -0.62, 0.13],
+          [side * -0.86, 3.08, 0.7, 0.14],
+          [side * 0.38, 3.22, -0.12, 0.1],
+          [side * -0.43, 2.82, 0.52, 0.12],
+          [side * 0.8, 2.5, 0.25, 0.12],
+          [side * -0.78, 2.45, -0.12, 0.13],
+          [side * 1.02, 2.86, 0.48, 0.13],
+          [side * -0.25, 3.12, 0.35, 0.11],
+          [side * 0.12, 2.95, 0.22, 0.14],
+          [side * -1.02, 2.92, 0.95, 0.12],
+          [side * 0.55, 2.65, 0.62, 0.12],
+          [side * -0.55, 3.25, -0.38, 0.1],
+          [side * 0.95, 2.42, -0.4, 0.11]
+        ];
+
+        clusters.forEach(([x, y, z, radius], clusterIndex) => {
+          const worldX = originX + x * treeScale;
+          const worldY = y * treeScale * 0.94;
+          const worldZ = originZ + z * treeScale;
+          drawBlossomCluster(worldX, worldY, worldZ, radius * treeScale, 0.82 + localRandom() * 0.5);
+          if (clusterIndex % 2 === 0) {
+            drawBlossomCluster(
+              worldX + (localRandom() - 0.5) * 0.26,
+              worldY + (localRandom() - 0.5) * 0.18,
+              worldZ + (localRandom() - 0.5) * 0.22,
+              radius * treeScale * 0.66,
+              0.7
+            );
+          }
+        });
+      }
+
+      function drawTorii() {
+        const x = -2.25;
+        const z = 4.25;
+        const y = 0.29;
+        const red = paletteValue("torii");
+        const redDark = paletteValue("toriiDark");
+        const gold = paletteValue("gold");
+
+        drawBox(x - 1.06, y, z, 0.23, 2.3, 0.23, red, { stroke: true, lineWidth: 0.7 });
+        drawBox(x + 1.06, y, z, 0.23, 2.3, 0.23, red, { stroke: true, lineWidth: 0.7 });
+        drawBox(x, y + 1.77, z, 2.72, 0.16, 0.24, redDark, { stroke: true, lineWidth: 0.7 });
+        drawBox(x, y + 2.09, z, 3.18, 0.18, 0.3, red, { stroke: true, lineWidth: 0.7 });
+
+        const beamPoints = [];
+        for (let index = 0; index <= 12; index += 1) {
+          const t = index / 12;
+          const bx = x - 1.62 + t * 3.24;
+          const curve = Math.pow(Math.abs(t - 0.5) * 2, 2.4) * 0.17;
+          beamPoints.push(project(bx, y + 2.34 + curve, z));
+        }
+        ctx.save();
+        ctx.strokeStyle = red;
+        ctx.lineWidth = Math.max(4, scale * 0.13);
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.beginPath();
+        ctx.moveTo(beamPoints[0].x, beamPoints[0].y);
+        for (let index = 1; index < beamPoints.length; index += 1) {
+          ctx.lineTo(beamPoints[index].x, beamPoints[index].y);
+        }
+        ctx.stroke();
+        ctx.strokeStyle = rgba(redDark, 0.8);
+        ctx.lineWidth = Math.max(1, scale * 0.018);
+        ctx.stroke();
+        ctx.restore();
+
+        drawBox(x, y + 1.98, z - 0.14, 0.56, 0.29, 0.18, redDark, { stroke: true, lineWidth: 0.5 });
+        const plaque = project(x, y + 2.12, z - 0.24);
+        ctx.fillStyle = rgba(gold, 0.82);
+        ctx.fillRect(plaque.x - Math.max(4, scale * 0.08), plaque.y - Math.max(6, scale * 0.12), Math.max(8, scale * 0.16), Math.max(12, scale * 0.24));
+        ctx.strokeStyle = rgba(redDark, 0.9);
+        ctx.lineWidth = 0.8;
+        ctx.strokeRect(plaque.x - Math.max(4, scale * 0.08), plaque.y - Math.max(6, scale * 0.12), Math.max(8, scale * 0.16), Math.max(12, scale * 0.24));
+      }
+
+      function drawStoneLantern(x, z, size = 1) {
+        const stone = paletteValue("stone");
+        const stoneLight = paletteValue("stoneLight");
+        const gold = paletteValue("gold");
+        drawBox(x, 0.28, z, 0.56 * size, 0.16 * size, 0.56 * size, stone, { stroke: true, lineWidth: 0.6 });
+        drawBox(x, 0.44, z, 0.17 * size, 0.58 * size, 0.17 * size, stoneLight, { stroke: true, lineWidth: 0.5 });
+        drawBox(x, 1.0, z, 0.4 * size, 0.3 * size, 0.4 * size, stoneLight, { stroke: true, lineWidth: 0.55 });
+        drawBox(x, 1.3, z, 0.66 * size, 0.15 * size, 0.66 * size, stone, { stroke: true, lineWidth: 0.6 });
+
+        const light = project(x, 1.16 * size, z + 0.205 * size);
+        ctx.save();
+        ctx.shadowColor = themeColor("window", 0.5 * (1 - dayAmount));
+        ctx.shadowBlur = scale * 0.24;
+        ctx.fillStyle = rgba(gold, 0.72);
+        ctx.beginPath();
+        ctx.arc(light.x, light.y, Math.max(2, scale * 0.055 * size), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawGround() {
+        const shadowPoint = project(0, 0.08, 0.1);
+        ctx.save();
+        const shadow = ctx.createRadialGradient(shadowPoint.x, shadowPoint.y + scale * 0.18, 0, shadowPoint.x, shadowPoint.y + scale * 0.18, scale * 5.2);
+        shadow.addColorStop(0, themeColor("shadow", 0.34));
+        shadow.addColorStop(0.56, themeColor("shadow", 0.13));
+        shadow.addColorStop(1, themeColor("shadow", 0));
+        ctx.fillStyle = shadow;
+        ctx.beginPath();
+        ctx.ellipse(shadowPoint.x, shadowPoint.y + scale * 0.22, scale * 5.35, scale * 1.5, yaw * 0.16, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        drawBox(0, -0.18, 0, 10.2, 0.3, 9.2, paletteValue("stoneDark"), {
+          stroke: true,
+          lineWidth: 0.9
+        });
+        drawBox(0, 0.07, 0, 8.4, 0.3, 7.3, paletteValue("moss"), {
+          stroke: true,
+          lineWidth: 0.9,
+          topGrain: true
+        });
+        drawBox(0, 0.34, 0, 6.0, 0.32, 4.7, paletteValue("stone"), {
+          stroke: true,
+          lineWidth: 0.9
+        });
+        drawBox(0, 0.63, 0, 4.45, 0.3, 3.8, paletteValue("stoneLight"), {
+          stroke: true,
+          lineWidth: 0.8
+        });
+        drawBox(0, 0.89, 0, 3.72, 0.2, 3.28, paletteValue("stone"), {
+          stroke: true,
+          lineWidth: 0.8
+        });
+
+        const pathStones = [
+          [-0.1, 3.02, 0.62, 0.48],
+          [0.18, 3.63, 0.56, 0.44],
+          [-0.2, 4.2, 0.5, 0.42],
+          [0.16, 4.82, 0.46, 0.4]
+        ];
+        pathStones.forEach(([x, z, w, d], index) => {
+          drawBox(x, 0.24 + index * 0.012, z, w, 0.08, d, paletteValue("stoneLight"), {
+            stroke: true,
+            lineWidth: 0.5
+          });
+        });
+      }
+
+      function drawBackground() {
+        const sky = ctx.createLinearGradient(0, 0, 0, height);
+        sky.addColorStop(0, paletteValue("skyTop"));
+        sky.addColorStop(0.54, paletteValue("skyMid"));
+        sky.addColorStop(0.82, paletteValue("skyBottom"));
+        sky.addColorStop(1, mixHex(night.skyBottom, day.skyBottom, dayAmount));
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, width, height);
+
+        const towerGlow = project(0, 3.8, -0.5);
+        const glow = ctx.createRadialGradient(towerGlow.x, towerGlow.y, 0, towerGlow.x, towerGlow.y, scale * 6.7);
+        glow.addColorStop(0, themeColor("gold", 0.075 * (1 - dayAmount * 0.6)));
+        glow.addColorStop(0.48, themeColor("haze", 0.04));
+        glow.addColorStop(1, themeColor("haze", 0));
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, 0, width, height);
+
+        const moonX = width * (width < 560 ? 0.82 : 0.78);
+        const moonY = height * (width < 560 ? 0.13 : 0.16);
+        const moonRadius = Math.min(54, width * 0.052);
+        const halo = ctx.createRadialGradient(moonX, moonY, moonRadius * 0.2, moonX, moonY, moonRadius * 4.3);
+        halo.addColorStop(0, themeColor("moonHalo", 0.24 * (1 - dayAmount * 0.35)));
+        halo.addColorStop(0.3, themeColor("moonHalo", 0.085));
+        halo.addColorStop(1, themeColor("moonHalo", 0));
+        ctx.fillStyle = halo;
+        ctx.beginPath();
+        ctx.arc(moonX, moonY, moonRadius * 4.3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.save();
+        ctx.shadowColor = themeColor("moonHalo", 0.4);
+        ctx.shadowBlur = moonRadius * 0.8;
+        ctx.fillStyle = themeColor("moon", 0.92 - dayAmount * 0.08);
+        ctx.beginPath();
+        ctx.arc(moonX, moonY, moonRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        ctx.save();
+        ctx.globalAlpha = 0.28 * (1 - dayAmount);
+        ctx.strokeStyle = themeColor("moon", 1);
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(moonX - 7, moonY - 5, moonRadius * 0.83, -0.25, 0.72);
+        ctx.stroke();
+        ctx.restore();
+
+        if (1 - dayAmount > 0.01) {
+          stars.forEach((star) => {
+            const twinkle = reduceMotion ? 0.65 : 0.55 + Math.sin(elapsed * star.speed + star.phase) * 0.35;
+            ctx.fillStyle = rgba(night.moon, star.alpha * twinkle * (1 - dayAmount));
+            ctx.beginPath();
+            ctx.arc(star.x * width, star.y * height, star.radius, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        }
+
+        drawHills();
+        drawFog();
+        drawVignette();
+      }
+
+      function drawHills() {
+        ctx.save();
+        const far = ctx.createLinearGradient(0, height * 0.45, 0, height * 0.8);
+        far.addColorStop(0, rgba(paletteValue("hillFar"), 0.1));
+        far.addColorStop(1, rgba(paletteValue("hillFar"), 0.34));
+        ctx.fillStyle = far;
+        ctx.beginPath();
+        ctx.moveTo(0, height * 0.72);
+        ctx.bezierCurveTo(width * 0.12, height * 0.6, width * 0.24, height * 0.68, width * 0.38, height * 0.64);
+        ctx.bezierCurveTo(width * 0.55, height * 0.58, width * 0.69, height * 0.69, width * 0.82, height * 0.62);
+        ctx.bezierCurveTo(width * 0.92, height * 0.58, width * 0.98, height * 0.64, width, height * 0.61);
+        ctx.lineTo(width, height * 0.88);
+        ctx.lineTo(0, height * 0.88);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = rgba(paletteValue("hillNear"), 0.26);
+        ctx.beginPath();
+        ctx.moveTo(0, height * 0.78);
+        ctx.bezierCurveTo(width * 0.16, height * 0.69, width * 0.28, height * 0.77, width * 0.43, height * 0.71);
+        ctx.bezierCurveTo(width * 0.59, height * 0.66, width * 0.66, height * 0.78, width * 0.79, height * 0.72);
+        ctx.bezierCurveTo(width * 0.9, height * 0.68, width * 0.96, height * 0.73, width, height * 0.7);
+        ctx.lineTo(width, height * 0.9);
+        ctx.lineTo(0, height * 0.9);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawFog() {
+        ctx.save();
+        ctx.globalAlpha = 0.12 + (1 - dayAmount) * 0.04;
+        const fog = ctx.createLinearGradient(0, height * 0.54, 0, height * 0.88);
+        fog.addColorStop(0, rgba(paletteValue("fog"), 0));
+        fog.addColorStop(0.5, rgba(paletteValue("fog"), 0.2));
+        fog.addColorStop(1, rgba(paletteValue("fog"), 0));
+        ctx.fillStyle = fog;
+        ctx.beginPath();
+        ctx.moveTo(0, height * 0.66);
+        ctx.bezierCurveTo(width * 0.18, height * 0.6, width * 0.28, height * 0.72, width * 0.47, height * 0.67);
+        ctx.bezierCurveTo(width * 0.64, height * 0.62, width * 0.78, height * 0.73, width, height * 0.66);
+        ctx.lineTo(width, height * 0.79);
+        ctx.bezierCurveTo(width * 0.76, height * 0.84, width * 0.56, height * 0.75, width * 0.35, height * 0.81);
+        ctx.bezierCurveTo(width * 0.17, height * 0.86, width * 0.08, height * 0.76, 0, height * 0.82);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawVignette() {
+        const vignette = ctx.createRadialGradient(width * 0.52, height * 0.46, Math.min(width, height) * 0.16, width * 0.52, height * 0.46, Math.max(width, height) * 0.72);
+        vignette.addColorStop(0, "rgba(0, 0, 0, 0)");
+        vignette.addColorStop(0.72, themeColor("shadow", 0.02));
+        vignette.addColorStop(1, themeColor("shadow", 1 - dayAmount > 0.5 ? 0.36 : 0.1));
+        ctx.fillStyle = vignette;
+        ctx.fillRect(0, 0, width, height);
+      }
+
+      function drawScene() {
+        drawBackground();
+        drawGround();
+
+        const sceneObjects = [
+          {
+            depth: project(-5.1, 0.3, -2.7).depth - 0.6,
+            draw: () => drawCherryTree(-5.05, -2.75, -1, 1.13, 11)
+          },
+          {
+            depth: project(5.25, 0.3, -2.55).depth - 0.6,
+            draw: () => drawCherryTree(5.15, -2.6, 1, 1.08, 27)
+          },
+          {
+            depth: -0.15,
+            draw: drawPagoda
+          },
+          {
+            depth: project(-2.25, 0.3, 4.25).depth + 0.08,
+            draw: drawTorii
+          },
+          {
+            depth: project(-3.55, 0.3, 2.65).depth,
+            draw: () => drawStoneLantern(-3.55, 2.65, 0.9)
+          },
+          {
+            depth: project(3.5, 0.3, 2.35).depth,
+            draw: () => drawStoneLantern(3.5, 2.35, 0.78)
+          }
+        ];
+
+        sceneObjects.sort((a, b) => a.depth - b.depth);
+        sceneObjects.forEach((object) => object.draw());
+
+        drawFireflies();
+        drawPetals();
+      }
+
+      function drawFireflies() {
+        if (dayAmount > 0.78) return;
+        ctx.save();
+        fireflies.forEach((firefly) => {
+          const drift = reduceMotion ? 0 : Math.sin(elapsed * firefly.speed + firefly.phase) * 0.08;
+          const point = project(firefly.x + drift, firefly.y + drift * 0.35, firefly.z);
+          const alpha = (0.32 + (reduceMotion ? 0 : Math.sin(elapsed * firefly.speed * 1.7 + firefly.phase) * 0.24)) * (1 - dayAmount);
+          ctx.fillStyle = themeColor("gold", Math.max(0.04, alpha));
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, Math.max(1.1, scale * 0.026), 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.restore();
+      }
+
+      function drawPetals() {
+        ctx.save();
+        petals.forEach((petal) => {
+          const x = petal.x * width + (reduceMotion ? 0 : Math.sin(elapsed * petal.sway + petal.phase) * 18);
+          const y = petal.y * height + (reduceMotion ? 0 : Math.sin(elapsed * 0.12 + petal.phase) * 7);
+          const alpha = petal.alpha * (0.65 + dayAmount * 0.2);
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(petal.rotation + (reduceMotion ? 0 : elapsed * 0.2 + petal.phase));
+          ctx.fillStyle = rgba(paletteValue("cherryLight"), alpha);
+          ctx.beginPath();
+          ctx.ellipse(0, 0, petal.size, petal.size * 0.48, -0.45, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+        ctx.restore();
+      }
+
+      function updatePetalMotion(dt) {
+        if (reduceMotion || paused) return;
+        petals.forEach((petal) => {
+          petal.y += petal.speed * dt;
+          petal.x += Math.sin(elapsed * 0.17 + petal.phase) * petal.speed * dt * 0.08;
+          petal.rotation += dt * 0.06;
+          if (petal.y > 1.06) {
+            petal.y = -0.06;
+            petal.x = (petal.x + 0.37 + petal.phase / (Math.PI * 2)) % 1;
+          }
+        });
+      }
+
+      function updateControls(announce = false) {
+        const themeLabel = isDay ? "日景" : "夜景";
+        const sceneMotion = paused
+          ? "所有場景動畫已暫停"
+          : reduceMotion
+            ? "自動旋轉，裝飾維持靜止"
+            : "自動旋轉";
+
+        pauseLabel.textContent = paused ? "繼續旋轉" : "暫停旋轉";
+        pauseState.textContent = paused ? "已暫停" : "旋轉中";
+        pauseButton.setAttribute("aria-pressed", String(paused));
+        pauseButton.setAttribute(
+          "aria-label",
+          paused ? "繼續旋轉，目前所有場景動畫已暫停" : "暫停旋轉與所有場景裝飾動畫"
+        );
+        dayState.textContent = isDay ? "日景" : "夜景";
+        dayButton.setAttribute("aria-pressed", String(isDay));
+        dayButton.setAttribute("aria-label", `切換日夜，目前為${themeLabel}`);
+        statusText.textContent = `${themeLabel} · ${sceneMotion} · 可拖曳或使用方向鍵`;
+        canvas.setAttribute(
+          "aria-label",
+          `原創日式五重塔庭園，包含五層塔樓、分層挑簷、格狀暖窗、紅色鳥居、石庭與盛開櫻花。目前為${themeLabel}，${sceneMotion}。`
+        );
+        if (announce) {
+          liveStatus.textContent = `${themeLabel}，${sceneMotion}`;
+        }
+      }
+
+      function setPaused(nextPaused, announce = true) {
+        paused = nextPaused;
+        updateControls(announce);
+        requestDraw();
+      }
+
+      function setDay(nextDay) {
+        isDay = nextDay;
+        dayTarget = isDay ? 1 : 0;
+        document.documentElement.dataset.theme = isDay ? "day" : "night";
+        if (reduceMotion) dayAmount = dayTarget;
+        updateControls(true);
+        requestDraw();
+      }
+
+      function resetView() {
+        resetTween = {
+          started: performance.now(),
+          duration: reduceMotion ? 1 : 720,
+          fromYaw: yaw,
+          fromElevation: elevation
+        };
+        resetState.textContent = "回復中";
+        liveStatus.textContent = "正在重設視角";
+        window.clearTimeout(resetTimer);
+        requestDraw();
+      }
+
+      function completeReset() {
+        resetTween = null;
+        yaw = initialView.yaw;
+        elevation = initialView.elevation;
+        resetState.textContent = "已重設";
+        liveStatus.textContent = "視角已重設";
+        window.clearTimeout(resetTimer);
+        resetTimer = window.setTimeout(() => {
+          resetState.textContent = "預設";
+        }, 1400);
+      }
+
+      function needsContinuousFrame() {
+        if (!pageVisible) return false;
+        if (resetTween || Math.abs(dayAmount - dayTarget) > 0.001) return true;
+        if (!paused && !dragging) return true;
+        return !paused && !reduceMotion;
+      }
+
+      function scheduleFrame() {
+        if (frameRequestId || !pageVisible) return;
+        frameRequestId = window.requestAnimationFrame(frame);
+      }
+
+      function requestDraw() {
+        scheduleFrame();
+      }
+
+      function frame(now) {
+        frameRequestId = 0;
+        if (!pageVisible) return;
+
+        const dt = lastFrame ? Math.min(0.05, (now - lastFrame) / 1000) : 0;
+        lastFrame = now;
+
+        if (!paused && !reduceMotion) elapsed += dt;
+
+        if (!paused && !dragging && !resetTween) {
+          yaw += dt * 0.065;
+        }
+
+        if (resetTween) {
+          const progress = clamp((now - resetTween.started) / resetTween.duration, 0, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          yaw = lerp(resetTween.fromYaw, initialView.yaw, eased);
+          elevation = lerp(resetTween.fromElevation, initialView.elevation, eased);
+          if (progress >= 1) completeReset();
+        }
+
+        if (Math.abs(dayAmount - dayTarget) > 0.001) {
+          dayAmount = reduceMotion
+            ? dayTarget
+            : lerp(dayAmount, dayTarget, Math.min(1, dt * 4.1));
+        } else {
+          dayAmount = dayTarget;
+        }
+
+        updatePetalMotion(dt);
+        drawScene();
+
+        if (needsContinuousFrame()) {
+          scheduleFrame();
+        } else {
+          lastFrame = 0;
+        }
+      }
+
+      pauseButton.addEventListener("click", () => {
+        setPaused(!paused);
+      });
+
+      dayButton.addEventListener("click", () => {
+        setDay(!isDay);
+      });
+
+      resetButton.addEventListener("click", resetView);
+
+      window.addEventListener("keydown", (event) => {
+        if (event.metaKey || event.ctrlKey || event.altKey) return;
+        const arrow = event.key;
+        if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(arrow)) return;
+        event.preventDefault();
+        if (resetTween) {
+          resetTween = null;
+          resetState.textContent = "自訂";
+        }
+        if (arrow === "ArrowLeft") yaw -= 0.12;
+        if (arrow === "ArrowRight") yaw += 0.12;
+        if (arrow === "ArrowUp") elevation = clamp(elevation + 0.025, 0.35, 0.54);
+        if (arrow === "ArrowDown") elevation = clamp(elevation - 0.025, 0.35, 0.54);
+        resetState.textContent = "自訂";
+        requestDraw();
+      });
+
+      canvas.addEventListener("pointerdown", (event) => {
+        if (event.pointerType === "mouse" && event.button !== 0) return;
+        dragging = true;
+        dragPointerId = event.pointerId;
+        resetTween = null;
+        resetState.textContent = "自訂";
+        canvas.classList.add("dragging");
+        canvas.setPointerCapture(event.pointerId);
+        dragPointerId = event.pointerId;
+        canvas.dataset.startX = String(event.clientX);
+        canvas.dataset.startY = String(event.clientY);
+        canvas.dataset.startYaw = String(yaw);
+        canvas.dataset.startElevation = String(elevation);
+        requestDraw();
+      });
+
+      canvas.addEventListener("pointermove", (event) => {
+        if (!dragging || event.pointerId !== dragPointerId) return;
+        const startX = Number(canvas.dataset.startX || event.clientX);
+        const startY = Number(canvas.dataset.startY || event.clientY);
+        const startYaw = Number(canvas.dataset.startYaw || yaw);
+        const startElevation = Number(canvas.dataset.startElevation || elevation);
+        yaw = startYaw + (event.clientX - startX) * 0.008;
+        elevation = clamp(startElevation - (event.clientY - startY) * 0.0014, 0.35, 0.54);
+        requestDraw();
+      });
+
+      function endDrag(event) {
+        if (!dragging || (event.pointerId !== undefined && event.pointerId !== dragPointerId)) return;
+        dragging = false;
+        dragPointerId = null;
+        canvas.classList.remove("dragging");
+        if (canvas.hasPointerCapture(event.pointerId)) {
+          canvas.releasePointerCapture(event.pointerId);
+        }
+        requestDraw();
+      }
+
+      canvas.addEventListener("pointerup", endDrag);
+      canvas.addEventListener("pointercancel", endDrag);
+
+      window.addEventListener("resize", () => {
+        window.clearTimeout(resizeTimer);
+        resizeTimer = window.setTimeout(() => {
+          setSize();
+          lastFrame = 0;
+          requestDraw();
+        }, 80);
+      });
+
+      motionQuery.addEventListener?.("change", (event) => {
+        reduceMotion = event.matches;
+        if (reduceMotion) {
+          setPaused(true, false);
+          dayAmount = dayTarget;
+        }
+        updateControls(false);
+        requestDraw();
+      });
+
+      document.addEventListener("visibilitychange", () => {
+        pageVisible = !document.hidden;
+        if (!pageVisible) {
+          if (frameRequestId) window.cancelAnimationFrame(frameRequestId);
+          frameRequestId = 0;
+          lastFrame = 0;
+          return;
+        }
+        lastFrame = 0;
+        requestDraw();
+      });
+
+      setSize();
+      updateControls(false);
+      requestDraw();
+    })();
+  </script>
+</body>
+</html>
